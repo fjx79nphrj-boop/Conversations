@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Skapa ikoner</title>
+</head>
+<body>
+    <canvas id="canvas192" width="192" height="192"></canvas>
+    <canvas id="canvas512" width="512" height="512"></canvas>
+    <script>
+        // Skapa 192x192 ikon
+        const canvas192 = document.getElementById('canvas192');
+        const ctx192 = canvas192.getContext('2d');
+        
+        // Gradient bakgrund
+        const gradient192 = ctx192.createLinearGradient(0, 0, 192, 192);
+        gradient192.addColorStop(0, '#007AFF');
+        gradient192.addColorStop(1, '#5AC8FA');
+        ctx192.fillStyle = gradient192;
+        ctx192.fillRect(0, 0, 192, 192);
+        
+        // Text
+        ctx192.fillStyle = 'white';
+        ctx192.font = 'bold 80px -apple-system, system-ui';
+        ctx192.textAlign = 'center';
+        ctx192.textBaseline = 'middle';
+        ctx192.fillText('💬', 96, 96);
+        
+        // Skapa 512x512 ikon
+        const canvas512 = document.getElementById('canvas512');
+        const ctx512 = canvas512.getContext('2d');
+        
+        const gradient512 = ctx512.createLinearGradient(0, 0, 512, 512);
+        gradient512.addColorStop(0, '#007AFF');
+        gradient512.addColorStop(1, '#5AC8FA');
+        ctx512.fillStyle = gradient512;
+        ctx512.fillRect(0, 0, 512, 512);
+        
+        ctx512.fillStyle = 'white';
+        ctx512.font = 'bold 220px -apple-system, system-ui';
+        ctx512.textAlign = 'center';
+        ctx512.textBaseline = 'middle';
+        ctx512.fillText('💬', 256, 256);
+        
+        // Ladda ner ikoner
+        setTimeout(() => {
+            // 192x192
+            canvas192.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'icon-192.png';
+                a.click();
+            });
+            
+            // 512x512
+            setTimeout(() => {
+                canvas512.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'icon-512.png';
+                    a.click();
+                });
+            }, 500);
+        }, 500);
+    </script>
+</body>
+</html>
