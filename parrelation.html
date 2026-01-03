@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflektionskort</title>
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-orange: #FF9500;
+            --ios-pink: #FF2D55;
+            --ios-purple: #AF52DE;
+            --ios-teal: #5AC8FA;
+            --ios-yellow: #FFCC00;
+            --ios-red: #FF3B30;
+            
+            --bg-primary: #F2F2F7;
+            --bg-secondary: #FFFFFF;
+            --text-primary: #000000;
+            --text-secondary: #8E8E93;
+            --separator: rgba(60, 60, 67, 0.29);
+            
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #000000;
+                --bg-secondary: #1C1C1E;
+                --text-primary: #FFFFFF;
+                --text-secondary: #8E8E93;
+                --separator: rgba(84, 84, 88, 0.65);
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .app-container {
+            max-width: 428px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 100px;
+        }
+        
+        /* Header */
+        .header {
+            padding: 60px 20px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+        }
+        
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 60px;
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            background: var(--bg-secondary);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            color: var(--ios-blue);
+            z-index: 999;
+            pointer-events: auto;
+        }
+        
+        .back-button:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .back-button:active {
+            transform: scale(0.95);
+        }
+        
+        .back-button svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .header h1 {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        
+        /* Start Screen */
+        .start-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            z-index: 400;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 20px;
+            overflow-y: auto;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .start-screen.hide {
+            display: none;
+        }
+        
+        .start-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .start-header h1 {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+        
+        .start-header p {
+            font-size: 17px;
+            color: var(--text-secondary);
+        }
+        
+        .category-grid {
+            display: grid;
+            gap: 12px;
+            max-width: 428px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .category-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .category-card:active {
+            transform: scale(0.98);
+        }
+        
+        .category-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .category-info {
+            flex: 1;
+        }
+        
+        .category-name {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .category-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .category-card.blandat {
+            background: linear-gradient(135deg, var(--ios-blue) 0%, var(--ios-purple) 100%);
+            color: white;
+            padding: 24px 20px;
+        }
+        
+        .category-card.blandat .category-name {
+            color: white;
+        }
+        
+        .category-card.blandat .category-count {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .category-card.blandat .category-icon {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Progress */
+        .progress-container {
+            padding: 0 20px 20px;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: var(--separator);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--ios-blue);
+            border-radius: 2px;
+            transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        /* Card Stack */
+        .card-stack {
+            position: relative;
+            padding: 0 20px;
+            min-height: 400px;
+        }
+        
+        .card {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 40px 28px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        
+        .card:active {
+            cursor: grabbing;
+        }
+        
+        .card.dragging {
+            transition: none;
+        }
+        
+        .card.exiting-left {
+            transform: translateX(-500px) rotate(-30deg);
+            opacity: 0;
+        }
+        
+        .card.exiting-right {
+            transform: translateX(500px) rotate(30deg);
+            opacity: 0;
+        }
+        
+        .card-category {
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .card-question {
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Category Colors */
+        .cat-du-jag { background: rgba(255, 45, 85, 0.15); color: var(--ios-pink); }
+        .cat-vardagsmys { background: rgba(255, 149, 0, 0.15); color: var(--ios-orange); }
+        .cat-framtid { background: rgba(90, 200, 250, 0.15); color: var(--ios-teal); }
+        .cat-heta-stolen { background: rgba(255, 59, 48, 0.15); color: var(--ios-red); }
+        .cat-djupa-tankar { background: rgba(0, 122, 255, 0.15); color: var(--ios-blue); }
+        .cat-laget { background: rgba(52, 199, 89, 0.15); color: var(--ios-green); }
+        .cat-bytte-plats { background: rgba(175, 82, 222, 0.15); color: var(--ios-purple); }
+        .cat-varderingar { background: rgba(255, 204, 0, 0.15); color: var(--ios-yellow); }
+        .cat-skratt { background: rgba(255, 149, 0, 0.15); color: var(--ios-orange); }
+        .cat-raw-truth-par { background: rgba(255, 59, 48, 0.15); color: var(--ios-red); }
+        
+        /* Action Buttons */
+        .actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(0deg, var(--bg-primary) 80%, transparent 100%);
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            z-index: 200;
+            max-width: 428px;
+            margin: 0 auto;
+        }
+        
+        .action-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 32px;
+            border: none;
+            background: var(--bg-secondary);
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .action-btn.skip {
+            background: var(--ios-red);
+        }
+        
+        .action-btn.answer {
+            background: var(--ios-green);
+            width: 72px;
+            height: 72px;
+            border-radius: 36px;
+        }
+        
+        .action-btn svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+        }
+        
+        /* Swipe Indicators */
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 17px;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        
+        .swipe-indicator.left {
+            left: 20px;
+            background: rgba(255, 59, 48, 0.9);
+            color: white;
+        }
+        
+        .swipe-indicator.right {
+            right: 20px;
+            background: rgba(52, 199, 89, 0.9);
+            color: white;
+        }
+        
+        .card.dragging .swipe-indicator {
+            opacity: 1;
+        }
+        
+        /* Complete Screen */
+        .complete-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            z-index: 300;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .complete-screen.show {
+            display: flex;
+        }
+        
+        .complete-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--ios-green);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .complete-icon svg {
+            width: 56px;
+            height: 56px;
+            color: white;
+        }
+        
+        .complete-screen h2 {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        
+        .complete-screen p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            max-width: 300px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .stat {
+            background: var(--bg-secondary);
+            padding: 20px 28px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .restart-btn {
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s;
+        }
+        
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .restart-btn:active {
+            transform: translateY(0);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="start-screen" id="startScreen">
+        <div class="start-header">
+            <h1>Reflektionskort</h1>
+            <p>Välj en kategori att utforska</p>
+        </div>
+        
+        <div class="category-grid">
+            <div class="category-card blandat" data-category="all">
+                <div class="category-icon">🎲</div>
+                <div class="category-info">
+                    <div class="category-name">Blandat</div>
+                    <div class="category-count">Alla 150 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="du-jag">
+                <div class="category-icon cat-du-jag">💕</div>
+                <div class="category-info">
+                    <div class="category-name">Du & Jag</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="vardagsmys">
+                <div class="category-icon cat-vardagsmys">🏠</div>
+                <div class="category-info">
+                    <div class="category-name">Vardagsmys & Kaos</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="framtid">
+                <div class="category-icon cat-framtid">🌟</div>
+                <div class="category-info">
+                    <div class="category-name">Drömmar & Framtid</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="heta-stolen">
+                <div class="category-icon cat-heta-stolen">🔥</div>
+                <div class="category-info">
+                    <div class="category-name">Heta stolen</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="djupa-tankar">
+                <div class="category-icon cat-djupa-tankar">💭</div>
+                <div class="category-info">
+                    <div class="category-name">Djupa Tankar</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="laget">
+                <div class="category-icon cat-laget">🤝</div>
+                <div class="category-info">
+                    <div class="category-name">Laget</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="bytte-plats">
+                <div class="category-icon cat-bytte-plats">🔄</div>
+                <div class="category-info">
+                    <div class="category-name">Om vi bytte plats</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="varderingar">
+                <div class="category-icon cat-varderingar">⚖️</div>
+                <div class="category-info">
+                    <div class="category-name">Värderingar & Livet</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="skratt">
+                <div class="category-icon cat-skratt">😄</div>
+                <div class="category-info">
+                    <div class="category-name">Skratt & Kul</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="raw-truth-par">
+                <div class="category-icon cat-raw-truth-par">💯</div>
+                <div class="category-info">
+                    <div class="category-name">The Raw Truth</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="app-container" id="appContainer" style="display: none;">
+        <div class="header">
+            <button class="back-button" id="backButton" aria-label="Tillbaka till meny" type="button">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <h1>Reflektionskort</h1>
+            <p>Svep för att svara eller hoppa över</p>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 av 150</div>
+        </div>
+        
+        <div class="card-stack" id="cardStack">
+            <!-- Cards will be generated here -->
+        </div>
+        
+        <div class="actions">
+            <button class="action-btn skip" id="skipBtn" aria-label="Hoppa över">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <button class="action-btn answer" id="answerBtn" aria-label="Besvara">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <div class="complete-screen" id="completeScreen">
+        <div class="complete-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+        <h2>Fantastiskt jobbat!</h2>
+        <p>Du har gått igenom alla reflektionskort</p>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="answeredCount">0</div>
+                <div class="stat-label">Besvarade</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="skippedCount">0</div>
+                <div class="stat-label">Överhoppade</div>
+            </div>
+        </div>
+        <button class="restart-btn" id="restartBtn">Välj ny kategori</button>
+    </div>
+    
+    <script>
+        const questions = [
+    // Du & Jag (Vår historia)
+    { q: "Vad var det första du tänkte när du såg mig för allra första gången?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vilken är din favoritbild på oss två och varför?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "När insåg du för första gången att du var kär i mig?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Om vi skulle skriva en bok om vår relation, vad skulle titeln vara?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vilken av våra dejter skulle du vilja uppleva igen, exakt som den var?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vad är det konstigaste eller roligaste minnet vi delar?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vilken låt kommer alltid att påminna dig om oss?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vad är det finaste jag någonsin har gjort för dig?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vilket var vårt mest pinsamma ögonblick som par?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vad trodde dina vänner om mig innan de träffade mig?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vilken egenskap hos mig föll du för först?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Om vi vann en resa vart som helst i världen imorgon, vart skulle vi åka?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vad är det mest oväntade du har lärt dig om mig sedan vi blev ihop?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vilken är den bästa komplimangen jag någonsin gett dig?", cat: "du-jag", catName: "Du & Jag" },
+    { q: "Vad är det mest lojala vi har gjort för varandra?", cat: "du-jag", catName: "Du & Jag" },
+    
+    // Vardagsmys & Kaos
+    { q: "Vilken hushållssyssla hatar du mest som jag brukar göra?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vem av oss är mest trolig att tappa bort nycklarna eller mobilen?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vad är din absoluta favoritmat som jag lagar (eller köper)?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Om vi var med i en reality-serie om vårt hem, vad skulle den heta?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vad är det konstigaste jag gör när jag tror att du inte ser?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vilken vana har jag som irriterar dig lite, men som du ändå tycker är söt?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Hur ser din perfekta söndag ut tillsammans med mig?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vem av oss är mest trolig att starta ett projekt men aldrig avsluta det?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vad är det mest onödiga vi har bråkat om det senaste året?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Om vi tvingades leva i en husbil i en månad, skulle vi överleva?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vilken är vår mest 'interna' grej som ingen annan skulle förstå?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vad är det första du gör när du kommer hem och jag inte är där?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vem av oss är mest 'chef' i köket?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vilken är den sämsta filmen vi har sett tillsammans?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    { q: "Vad är hemligheten bakom att vi fungerar så bra i vardagen?", cat: "vardagsmys", catName: "Vardagsmys & Kaos" },
+    
+    // Drömmar & Framtid
+    { q: "Var ser du oss om exakt tio år?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Vilket mål vill du att vi ska uppnå tillsammans innan året är slut?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Om vi blev ekonomiskt oberoende imorgon, hur skulle vårt liv ändras?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Vilken sorts gamla människor tror du att vi kommer bli?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Vad är din största personliga dröm som du vill att jag stöttar dig i?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Skulle du vilja bo i ett annat land med mig i ett år? Vart?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Vad är det viktigaste för dig att vi aldrig slutar göra som par?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Hur ser ditt drömhus ut om vi fick bygga det helt själva?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Vilken resa eller upplevelse står överst på vår 'bucket list'?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Vad är du mest taggad på inför vår framtid tillsammans?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Om vi fick chansen att byta karriär helt, vad skulle vi göra då?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Vad är något du vill att vi ska lära oss tillsammans (t.ex. dans, språk)?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Tror du att vi kommer bo kvar i samma stad resten av livet?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Vilket arv (värderingar eller minnen) vill du att vi lämnar efter oss?", cat: "framtid", catName: "Drömmar & Framtid" },
+    { q: "Vad är det viktigaste för att hålla gnistan vid liv när vi blir gamla?", cat: "framtid", catName: "Drömmar & Framtid" },
+    
+    // Heta stolen (Intimitet & Lust)
+    { q: "Vad är det sexigaste jag kan ha på mig enligt dig?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Vilken är din absoluta favoritplats att bli kysst på?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Vad är något du har velat testa i sovrummet men inte vågat säga än?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "När känner du dig som mest attraherad av mig?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Vilket är ditt favoritminne av oss från sovrummet?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Vad är det mest spontana vi har gjort tillsammans?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Hur viktigt är fysisk beröring för dig på en skala 1–10?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Vad är din största 'turn-on' som jag gör utan att tänka på det?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Vad är din favorit-tid på dygnet för närhet?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Vilken sorts beröring (inte sexuell) uppskattar du mest av mig?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Om du fick beskriva vårt sexliv med en filmtitel, vilken skulle det vara?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Vad får dig att känna dig som mest trygg och avslappnad med mig?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Finns det någon fantasi du vill att vi ska förverkliga snart?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Hur har din syn på närhet förändrats sedan vi träffades?", cat: "heta-stolen", catName: "Heta stolen" },
+    { q: "Vad är det första du tänker på när jag rör vid din nacke?", cat: "heta-stolen", catName: "Heta stolen" },
+    
+    // Djupa Tankar (Sårbarhet)
+    { q: "Vad är du mest rädd för att förlora i vår relation?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Finns det något du kämpar med just nu som jag kan hjälpa dig med?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "När känner du dig som mest missförstådd av mig?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Vad är du mest stolt över hos dig själv som person?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Vad är du mest stolt över hos mig som person?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Vilken är den svåraste läxan du har lärt dig från en tidigare relation?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Vad är något du sällan säger högt men som betyder mycket för dig?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Känner du att du kan vara 100 % dig själv med mig, eller håller du tillbaka något?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Vilken känsla har du svårast att uttrycka i ord?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Vad gör dig mest osäker i vår relation?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Hur vill du bli tröstad när du är riktigt ledsen?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Vad är det viktigaste jag har lärt dig om livet?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Finns det något vi behöver prata om mer ofta än vi gör?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "Vad får dig att känna dig mest älskad av mig?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    { q: "När kände du dig senast genuint sedd av mig?", cat: "djupa-tankar", catName: "Djupa Tankar" },
+    
+    // Laget (Samarbete & Kommunikation)
+    { q: "Vad tycker du är vår största styrka som ett team?", cat: "laget", catName: "Laget" },
+    { q: "Hur kan jag bli en bättre lyssnare för dig?", cat: "laget", catName: "Laget" },
+    { q: "Vilken regel (skriven eller oskriven) tycker du är viktigast i vår relation?", cat: "laget", catName: "Laget" },
+    { q: "Hur tycker du att vi hanterar konflikter? Vad kan vi förbättra?", cat: "laget", catName: "Laget" },
+    { q: "Vem av oss är bäst på att säga förlåt först?", cat: "laget", catName: "Laget" },
+    { q: "Vad är det bästa sättet för mig att visa uppskattning för det du gör?", cat: "laget", catName: "Laget" },
+    { q: "Hur fattar vi bäst beslut tillsammans?", cat: "laget", catName: "Laget" },
+    { q: "Vad är en sak du önskar att vi slutade bråka om för gott?", cat: "laget", catName: "Laget" },
+    { q: "Känner du att vi ger varandra tillräckligt med utrymme för egna intressen?", cat: "laget", catName: "Laget" },
+    { q: "Vad gör vi när vi märker att vi börjar glida ifrån varandra i vardagen?", cat: "laget", catName: "Laget" },
+    { q: "Vilken av mina åsikter tycker du är mest utmanande att förstå?", cat: "laget", catName: "Laget" },
+    { q: "Hur firar vi våra framgångar på bästa sätt?", cat: "laget", catName: "Laget" },
+    { q: "Vad är din definition av lojalitet i en relation?", cat: "laget", catName: "Laget" },
+    { q: "Känner du att vi prioriterar varandra tillräckligt högt?", cat: "laget", catName: "Laget" },
+    { q: "Vad är det första tecknet på att du är arg på mig (som jag kanske missar)?", cat: "laget", catName: "Laget" },
+    
+    // Om vi bytte plats
+    { q: "Vad tror du är det svåraste med att vara tillsammans med dig?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Vad tror du är det svåraste med att vara tillsammans med mig?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Om du fick byta en egenskap hos mig mot en hos dig själv, vad skulle det vara?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Vilken av mina arbetsuppgifter tror du att du skulle hata mest?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Vad i min morgonrutin tycker du verkar mest orimligt?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Om du fick styra min garderob för en vecka, vad skulle jag få ha på mig?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Vilken av mina vänner tycker du är roligast att hänga med?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Vad tror du att jag dagdrömmer om mest?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Om du fick svara på en fråga som mig, hur skulle du beskriva vår relation?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Vad är det modigaste jag har gjort enligt dig?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Vilken del av mitt jobb tror du att du skulle vara bäst på?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Vad är det konstigaste jag äter enligt dig?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Om du fick 'låna' en av mina talanger, vilken skulle du välja?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Vad tror du att jag är mest tacksam för i mitt liv?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    { q: "Vilken av mina familjemedlemmar är du mest lik (i smyg)?", cat: "bytte-plats", catName: "Om vi bytte plats" },
+    
+    // Värderingar & Livet
+    { q: "Vad är din syn på pengar – spara för framtiden eller leva för nuet?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Hur viktigt är det för dig vad andra tycker om oss som par?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Vad är din inställning till att förlåta och gå vidare?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Vilken roll spelar familj och släkt i vårt liv enligt dig?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Vad tycker du är det absolut viktigaste att lära ett barn?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Hur ser din spirituella eller filosofiska syn på livet ut?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Vad är det viktigaste vi kan göra för att bidra till världen tillsammans?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Hur hanterar du bäst stora förändringar i livet?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Vad är din definition av ett 'lyckat liv'?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Hur viktig är ärlighet kontra att vara snäll (vita lögner)?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Vilken samhällsfråga brinner du mest för?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Vad är din största rädsla när det gäller världen i framtiden?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Hur mycket betyder karriär jämfört med fritid för dig?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Vad är det mest meningsfulla du har gjort i ditt liv hittills?", cat: "varderingar", catName: "Värderingar & Livet" },
+    { q: "Tror du på ödet eller att vi skapar vår egen tur?", cat: "varderingar", catName: "Värderingar & Livet" },
+    
+    // Skratt & Kul
+    { q: "Om vi var karaktärer i en komediserie, vem skulle vara den klantiga?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Vilket är det fånigaste smeknamnet du har gett mig?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Om vi startade ett band, vad skulle det heta och vilken genre skulle vi spela?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Vad är det roligaste som har hänt när vi har rest tillsammans?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Vem av oss skulle klara sig längst i en tystnadstävling?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Vilken är din favorit-'meme' som påminner om oss?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Om vi var tvungna att vara med i ett TV-program (t.ex. Gift vid första ögonkastet), hur skulle det gå?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Vad är det mest pinsamma du har gjort framför mina föräldrar?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Vilket är mitt märkligaste 'partytrick'?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Om vi vann en miljon på en trisslott idag, vad är det första vi köper?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Vem av oss är sämst förlorare i brädspel?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Vad är det konstigaste du har hört mig säga när jag pratar i sömnen?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Om vi skulle klä ut oss till ett känt par på Halloween, vilka skulle vi vara?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Vad är det roligaste skämtet du vet som du alltid skrattar åt?", cat: "skratt", catName: "Skratt & Kul" },
+    { q: "Vilken är den knasigaste sökningen du har gjort på Google nyligen?", cat: "skratt", catName: "Skratt & Kul" },
+    
+    // The Raw Truth (Ärlighetstestet)
+    { q: "Finns det något du stör dig på hos mig men som du aldrig har sagt?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Har du någonsin låtsas vara intresserad av något jag pratat om bara för att vara snäll?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Vad är det mest själviska du har gjort i vår relation?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "När kände du dig senast riktigt svartsjuk?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Finns det något du saknar från ditt liv som singel?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Vad är den största uppoffringen du känner att du har gjort för oss?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Har du någonsin tvivlat på om vi kommer hålla för evigt?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Vad är något jag gör som får dig att känna dig osäker?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Vilken av mina vänner eller familjemedlemmar har du svårast för?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Om du fick ändra en sak med hur vi lever vårt liv idag, vad skulle det vara?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "När blev du senast besviken på mig utan att säga det?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Känner du att balansen mellan ge och ta är rättvis mellan oss?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Vad är det mest utmanande med min personlighet?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Finns det något du ljuger om för att undvika bråk?", cat: "raw-truth-par", catName: "The Raw Truth" },
+    { q: "Vad är den viktigaste anledningen till att du väljer att vara med mig varje dag?", cat: "raw-truth-par", catName: "The Raw Truth" }
+];
+        
+        // Shuffle questions
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+        
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let answeredCount = 0;
+        let skippedCount = 0;
+        let selectedCategory = 'all';
+        
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const startScreen = document.getElementById('startScreen');
+            const appContainer = document.getElementById('appContainer');
+            const cardStack = document.getElementById('cardStack');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const completeScreen = document.getElementById('completeScreen');
+            const skipBtn = document.getElementById('skipBtn');
+            const answerBtn = document.getElementById('answerBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            
+            function returnToMenu() {
+                appContainer.style.display = 'none';
+                startScreen.classList.remove('hide');
+                completeScreen.classList.remove('show');
+            }
+            
+            // Category selection
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    selectedCategory = card.dataset.category;
+                    startGame();
+                });
+            });
+            
+            function startGame() {
+                // Filter questions by category
+                let filteredQuestions = selectedCategory === 'all' 
+                    ? questions 
+                    : questions.filter(q => q.cat === selectedCategory);
+                
+                shuffledQuestions = shuffle(filteredQuestions);
+                currentIndex = 0;
+                answeredCount = 0;
+                skippedCount = 0;
+                
+                // Show app, hide start screen
+                startScreen.classList.add('hide');
+                appContainer.style.display = 'block';
+                
+                loadCards();
+                
+                // Setup back button
+                setTimeout(() => {
+                    const backBtn = document.getElementById('backButton');
+                    
+                    if (backBtn) {
+                        // Remove any existing listeners
+                        const newBackBtn = backBtn.cloneNode(true);
+                        backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+                        
+                        // Add click listener
+                        newBackBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            returnToMenu();
+                        }, true);
+                        
+                        // Also try touch events for mobile
+                        newBackBtn.addEventListener('touchend', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            returnToMenu();
+                        }, true);
+                    }
+                }, 200);
+            }
+            
+            function createCard(question, index) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.transform = `translateY(${Math.min(index * 4, 12)}px) scale(${1 - Math.min(index * 0.02, 0.06)})`;
+                card.style.zIndex = 100 - index;
+                card.style.opacity = index < 3 ? 1 : 0;
+                
+                card.innerHTML = `
+                    <span class="card-category cat-${question.cat}">${question.catName}</span>
+                    <div class="card-question">${question.q}</div>
+                    <div class="swipe-indicator left">Hoppa över</div>
+                    <div class="swipe-indicator right">Besvara</div>
+                `;
+                
+                let startX = 0;
+                let currentX = 0;
+                let isDragging = false;
+                
+                function handleStart(e) {
+                    isDragging = true;
+                    card.classList.add('dragging');
+                    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    currentX = startX;
+                }
+                
+                function handleMove(e) {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    const diff = currentX - startX;
+                    const rotation = diff / 20;
+                    card.style.transform = `translateX(${diff}px) rotate(${rotation}deg)`;
+                    
+                    const leftIndicator = card.querySelector('.swipe-indicator.left');
+                    const rightIndicator = card.querySelector('.swipe-indicator.right');
+                    
+                    if (diff < -50) {
+                        leftIndicator.style.opacity = Math.min(Math.abs(diff) / 150, 1);
+                        rightIndicator.style.opacity = 0;
+                    } else if (diff > 50) {
+                        rightIndicator.style.opacity = Math.min(diff / 150, 1);
+                        leftIndicator.style.opacity = 0;
+                    } else {
+                        leftIndicator.style.opacity = 0;
+                        rightIndicator.style.opacity = 0;
+                    }
+                }
+                
+                function handleEnd() {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    card.classList.remove('dragging');
+                    
+                    const diff = currentX - startX;
+                    const leftIndicator = card.querySelector('.swipe-indicator.left');
+                    const rightIndicator = card.querySelector('.swipe-indicator.right');
+                    leftIndicator.style.opacity = 0;
+                    rightIndicator.style.opacity = 0;
+                    
+                    if (Math.abs(diff) > 100) {
+                        if (diff < 0) {
+                            skipCard();
+                        } else {
+                            answerCard();
+                        }
+                    } else {
+                        card.style.transform = '';
+                    }
+                }
+                
+                card.addEventListener('mousedown', handleStart);
+                card.addEventListener('mousemove', handleMove);
+                card.addEventListener('mouseup', handleEnd);
+                card.addEventListener('mouseleave', handleEnd);
+                
+                card.addEventListener('touchstart', handleStart, { passive: true });
+                card.addEventListener('touchmove', handleMove, { passive: false });
+                card.addEventListener('touchend', handleEnd);
+                
+                return card;
+            }
+            
+            function loadCards() {
+                cardStack.innerHTML = '';
+                for (let i = 0; i < Math.min(3, shuffledQuestions.length - currentIndex); i++) {
+                    const card = createCard(shuffledQuestions[currentIndex + i], i);
+                    cardStack.appendChild(card);
+                }
+                updateProgress();
+            }
+            
+            function updateProgress() {
+                const progress = (currentIndex / shuffledQuestions.length) * 100;
+                progressFill.style.width = `${progress}%`;
+                progressText.textContent = `${currentIndex} av ${shuffledQuestions.length}`;
+            }
+            
+            function removeCurrentCard(direction) {
+                const cards = cardStack.querySelectorAll('.card');
+                if (cards.length === 0) return;
+                
+                const topCard = cards[0];
+                topCard.classList.add(direction === 'left' ? 'exiting-left' : 'exiting-right');
+                
+                setTimeout(() => {
+                    topCard.remove();
+                    currentIndex++;
+                    
+                    if (currentIndex < shuffledQuestions.length) {
+                        const nextIndex = cardStack.querySelectorAll('.card').length;
+                        if (currentIndex + nextIndex < shuffledQuestions.length) {
+                            const newCard = createCard(shuffledQuestions[currentIndex + nextIndex], nextIndex);
+                            cardStack.appendChild(newCard);
+                            
+                            setTimeout(() => {
+                                newCard.style.opacity = 1;
+                            }, 50);
+                        }
+                        
+                        // Update remaining cards
+                        const remainingCards = cardStack.querySelectorAll('.card');
+                        remainingCards.forEach((card, index) => {
+                            card.style.transform = `translateY(${Math.min(index * 4, 12)}px) scale(${1 - Math.min(index * 0.02, 0.06)})`;
+                            card.style.zIndex = 100 - index;
+                        });
+                        
+                        updateProgress();
+                    } else {
+                        showComplete();
+                    }
+                }, 300);
+            }
+            
+            function skipCard() {
+                skippedCount++;
+                removeCurrentCard('left');
+            }
+            
+            function answerCard() {
+                answeredCount++;
+                removeCurrentCard('right');
+            }
+            
+            function showComplete() {
+                document.getElementById('answeredCount').textContent = answeredCount;
+                document.getElementById('skippedCount').textContent = skippedCount;
+                completeScreen.classList.add('show');
+            }
+            
+            function restart() {
+                returnToMenu();
+            }
+            
+            skipBtn.addEventListener('click', skipCard);
+            answerBtn.addEventListener('click', answerCard);
+            restartBtn.addEventListener('click', restart);
+            
+            // Keyboard support
+            document.addEventListener('keydown', (e) => {
+                if (completeScreen.classList.contains('show')) return;
+                if (appContainer.style.display === 'none') return;
+                if (e.key === 'ArrowLeft') skipCard();
+                if (e.key === 'ArrowRight') answerCard();
+            });
+        });
+    </script>
+</body>
+</html>

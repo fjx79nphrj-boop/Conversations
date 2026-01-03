@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflektionskort</title>
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-orange: #FF9500;
+            --ios-pink: #FF2D55;
+            --ios-purple: #AF52DE;
+            --ios-teal: #5AC8FA;
+            --ios-yellow: #FFCC00;
+            --ios-red: #FF3B30;
+            
+            --bg-primary: #F2F2F7;
+            --bg-secondary: #FFFFFF;
+            --text-primary: #000000;
+            --text-secondary: #8E8E93;
+            --separator: rgba(60, 60, 67, 0.29);
+            
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #000000;
+                --bg-secondary: #1C1C1E;
+                --text-primary: #FFFFFF;
+                --text-secondary: #8E8E93;
+                --separator: rgba(84, 84, 88, 0.65);
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .app-container {
+            max-width: 428px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 100px;
+        }
+        
+        /* Header */
+        .header {
+            padding: 60px 20px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+        }
+        
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 60px;
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            background: var(--bg-secondary);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            color: var(--ios-blue);
+            z-index: 999;
+            pointer-events: auto;
+        }
+        
+        .back-button:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .back-button:active {
+            transform: scale(0.95);
+        }
+        
+        .back-button svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .header h1 {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        
+        /* Start Screen */
+        .start-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            z-index: 400;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 20px;
+            overflow-y: auto;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .start-screen.hide {
+            display: none;
+        }
+        
+        .start-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .start-header h1 {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+        
+        .start-header p {
+            font-size: 17px;
+            color: var(--text-secondary);
+        }
+        
+        .category-grid {
+            display: grid;
+            gap: 12px;
+            max-width: 428px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .category-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .category-card:active {
+            transform: scale(0.98);
+        }
+        
+        .category-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .category-info {
+            flex: 1;
+        }
+        
+        .category-name {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .category-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .category-card.blandat {
+            background: linear-gradient(135deg, var(--ios-blue) 0%, var(--ios-purple) 100%);
+            color: white;
+            padding: 24px 20px;
+        }
+        
+        .category-card.blandat .category-name {
+            color: white;
+        }
+        
+        .category-card.blandat .category-count {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .category-card.blandat .category-icon {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Progress */
+        .progress-container {
+            padding: 0 20px 20px;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: var(--separator);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--ios-blue);
+            border-radius: 2px;
+            transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        /* Card Stack */
+        .card-stack {
+            position: relative;
+            padding: 0 20px;
+            min-height: 400px;
+        }
+        
+        .card {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 40px 28px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        
+        .card:active {
+            cursor: grabbing;
+        }
+        
+        .card.dragging {
+            transition: none;
+        }
+        
+        .card.exiting-left {
+            transform: translateX(-500px) rotate(-30deg);
+            opacity: 0;
+        }
+        
+        .card.exiting-right {
+            transform: translateX(500px) rotate(30deg);
+            opacity: 0;
+        }
+        
+        .card-category {
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .card-question {
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Category Colors */
+        .cat-minnen { background: rgba(255, 149, 0, 0.15); color: var(--ios-orange); }
+        .cat-resor { background: rgba(90, 200, 250, 0.15); color: var(--ios-teal); }
+        .cat-vardagen { background: rgba(52, 199, 89, 0.15); color: var(--ios-green); }
+        .cat-vem-familjen { background: rgba(255, 204, 0, 0.15); color: var(--ios-yellow); }
+        .cat-mat { background: rgba(255, 45, 85, 0.15); color: var(--ios-pink); }
+        .cat-framtid { background: rgba(175, 82, 222, 0.15); color: var(--ios-purple); }
+        .cat-stolthet { background: rgba(0, 122, 255, 0.15); color: var(--ios-blue); }
+        .cat-husdjur { background: rgba(52, 199, 89, 0.15); color: var(--ios-green); }
+        .cat-skratt { background: rgba(255, 149, 0, 0.15); color: var(--ios-orange); }
+        .cat-blandat { background: rgba(255, 45, 85, 0.15); color: var(--ios-pink); }
+        
+        /* Action Buttons */
+        .actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(0deg, var(--bg-primary) 80%, transparent 100%);
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            z-index: 200;
+            max-width: 428px;
+            margin: 0 auto;
+        }
+        
+        .action-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 32px;
+            border: none;
+            background: var(--bg-secondary);
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .action-btn.skip {
+            background: var(--ios-red);
+        }
+        
+        .action-btn.answer {
+            background: var(--ios-green);
+            width: 72px;
+            height: 72px;
+            border-radius: 36px;
+        }
+        
+        .action-btn svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+        }
+        
+        /* Swipe Indicators */
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 17px;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        
+        .swipe-indicator.left {
+            left: 20px;
+            background: rgba(255, 59, 48, 0.9);
+            color: white;
+        }
+        
+        .swipe-indicator.right {
+            right: 20px;
+            background: rgba(52, 199, 89, 0.9);
+            color: white;
+        }
+        
+        .card.dragging .swipe-indicator {
+            opacity: 1;
+        }
+        
+        /* Complete Screen */
+        .complete-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            z-index: 300;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .complete-screen.show {
+            display: flex;
+        }
+        
+        .complete-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--ios-green);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .complete-icon svg {
+            width: 56px;
+            height: 56px;
+            color: white;
+        }
+        
+        .complete-screen h2 {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        
+        .complete-screen p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            max-width: 300px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .stat {
+            background: var(--bg-secondary);
+            padding: 20px 28px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .restart-btn {
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s;
+        }
+        
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .restart-btn:active {
+            transform: translateY(0);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="start-screen" id="startScreen">
+        <div class="start-header">
+            <h1>Reflektionskort</h1>
+            <p>Välj en kategori att utforska</p>
+        </div>
+        
+        <div class="category-grid">
+            <div class="category-card blandat" data-category="all">
+                <div class="category-icon">🎲</div>
+                <div class="category-info">
+                    <div class="category-name">Blandat</div>
+                    <div class="category-count">Alla 150 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="minnen">
+                <div class="category-icon cat-minnen">📸</div>
+                <div class="category-info">
+                    <div class="category-name">Gemensamma minnen</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="resor">
+                <div class="category-icon cat-resor">✈️</div>
+                <div class="category-info">
+                    <div class="category-name">Resor & Äventyr</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="vardagen">
+                <div class="category-icon cat-vardagen">🏠</div>
+                <div class="category-info">
+                    <div class="category-name">Vardagsäventyr & Rutiner</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="vem-familjen">
+                <div class="category-icon cat-vem-familjen">👉</div>
+                <div class="category-info">
+                    <div class="category-name">Vem i familjen?</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="mat">
+                <div class="category-icon cat-mat">🍽️</div>
+                <div class="category-info">
+                    <div class="category-name">Mat & Köksbordssnack</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="framtid">
+                <div class="category-icon cat-framtid">🌟</div>
+                <div class="category-info">
+                    <div class="category-name">Framtidsdrömmar</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="stolthet">
+                <div class="category-icon cat-stolthet">💪</div>
+                <div class="category-info">
+                    <div class="category-name">Stolthet & Värderingar</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="husdjur">
+                <div class="category-icon cat-husdjur">🐾</div>
+                <div class="category-info">
+                    <div class="category-name">Husdjur & Natur</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="skratt">
+                <div class="category-icon cat-skratt">😄</div>
+                <div class="category-info">
+                    <div class="category-name">Skratt & Knasigheter</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="blandat">
+                <div class="category-icon cat-blandat">🎉</div>
+                <div class="category-info">
+                    <div class="category-name">Blandat & Oväntat</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="app-container" id="appContainer" style="display: none;">
+        <div class="header">
+            <button class="back-button" id="backButton" aria-label="Tillbaka till meny" type="button">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <h1>Reflektionskort</h1>
+            <p>Svep för att svara eller hoppa över</p>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 av 150</div>
+        </div>
+        
+        <div class="card-stack" id="cardStack">
+            <!-- Cards will be generated here -->
+        </div>
+        
+        <div class="actions">
+            <button class="action-btn skip" id="skipBtn" aria-label="Hoppa över">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <button class="action-btn answer" id="answerBtn" aria-label="Besvara">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <div class="complete-screen" id="completeScreen">
+        <div class="complete-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+        <h2>Fantastiskt jobbat!</h2>
+        <p>Du har gått igenom alla reflektionskort</p>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="answeredCount">0</div>
+                <div class="stat-label">Besvarade</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="skippedCount">0</div>
+                <div class="stat-label">Överhoppade</div>
+            </div>
+        </div>
+        <button class="restart-btn" id="restartBtn">Välj ny kategori</button>
+    </div>
+    
+    <script>
+        const questions = [
+    // Gemensamma minnen
+    { q: "Vilket är det absolut roligaste minnet vi har tillsammans som familj?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Om vi skulle göra en film om vår familj, vilken scen skulle vara öppningsscenen?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Vilket minne får dig alltid att börja skratta, oavsett hur trött du är?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Finns det något som gick 'fel' (t.ex. en bränd middag), men som blev ett bra minne efteråt?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Vilken dag i vår familjs historia skulle du vilja leva om precis som den var?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Vad är det konstigaste vi har varit med om tillsammans?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Vem av oss har bäst minne för detaljer från när vi var små?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Vilket är ditt favoritminne från en jul eller födelsedag hos oss?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Minns du någon gång när vi alla skrattade så mycket att vi fick ont i magen?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Vad är det första du tänker på när du hör ordet 'hemma'?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Finns det ett minne som bara vi i den här familjen förstår?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Vilket minne gör dig mest stolt över oss som grupp?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Vilken var vår bästa utflykt någonsin, även om den var kort?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Vem i familjen har berättat den bästa historien om något som hände för länge sedan?", cat: "minnen", catName: "Gemensamma minnen" },
+    { q: "Vilket minne hoppas du att vi aldrig glömmer bort?", cat: "minnen", catName: "Gemensamma minnen" },
+    
+    // Resor & Äventyr
+    { q: "Om vi fick flytta till valfritt land i ett år, vart skulle vi åka?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Vilken är den bästa resan vi har gjort tillsammans hittills?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Vad är det mest udda vi har ätit på en resa?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Om vi vann en lyxresa imorgon, skulle vi välja sol och bad eller snö och skidor?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Vilket är vårt mest misslyckade, men roligaste, reseminne?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Vem av oss är bäst på att packa (och vem packar alltid för mycket)?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Om vi skulle åka på en 'överraskningsresa', vem i familjen skulle få planera den?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Vilken plats i världen skulle du vilja visa resten av familjen?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Vad är det bästa med att komma hem igen efter en lång resa?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Vem är mest trolig att gå vilse på en semester?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Om vi fick bo på ett slott, i ett tält eller i en trädkoja – vad väljer vi?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Vilket språk skulle vi vilja lära oss tillsammans som familj?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Vad är det viktigaste att ha med sig i bilen på en långresa?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Vilken är din drömresa som vi inte har gjort än?", cat: "resor", catName: "Resor & Äventyr" },
+    { q: "Om vi var upptäcktsresande, vad skulle vi vilja hitta på vår expedition?", cat: "resor", catName: "Resor & Äventyr" },
+    
+    // Vardagsäventyr & Rutiner
+    { q: "Vilken är vår absolut bästa familjetradition?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Om vi fick införa en helt ny tradition, vad skulle det vara?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Vad är det mysigaste vi gör tillsammans en helt vanlig tisdag?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Vem i familjen är morgonpiggast och vem är en nattuggla?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Om vi hade en 'våffel-frukost-fest' varje vecka, vilken dag skulle det vara?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Vilken är din favoritmat som vi brukar äta på vardagar?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Vem av oss är bäst på att hitta på roliga saker när vi har tråkigt?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Vad är det mest spännande som har hänt i vårt område nyligen?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Om vi fick bygga om ett rum i huset till något helt galet, vad skulle det bli?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Vilken är vår 'officiella' familjelåt som vi alla kan sjunga med i?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Vem i familjen är bäst på att fixa saker som gått sönder?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Vad är det bästa med våra fredagsmys?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Om vi skulle ha en tävling i något hemma, vad skulle det vara för att alla ska ha en chans?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Vilken hushållssyssla är den tråkigaste vi gör tillsammans?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    { q: "Vad är det första du vill göra när det blir helg?", cat: "vardagen", catName: "Vardagsäventyr & Rutiner" },
+    
+    // Vem i familjen?
+    { q: "Vem i familjen skulle klara sig bäst på en öde ö?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem är mest trolig att börja dansa när det spelas musik i en affär?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem är familjens största tidsoptimist?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem har det stökigaste rummet/skåpet just nu?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem i familjen är mest lik en känd superhjälte?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem är mest trolig att glömma bort var de la sina glasögon eller sin mobil?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem av oss är bäst på att hålla en hemlighet?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem är mest modig när det gäller att smaka på ny, konstig mat?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem i familjen skrattar högst?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem är mest trolig att vinna i ett sällskapsspel?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem är bäst på att trösta någon som är ledsen?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem av oss pratar mest vid middagsbordet?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem är mest teknisk och får fixa när TV:n eller nätverket krånglar?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem i familjen har de mest konstiga drömmarna på natten?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    { q: "Vem är bäst på att härma andra i familjen?", cat: "vem-familjen", catName: "Vem i familjen?" },
+    
+    // Mat & Köksbordssnack
+    { q: "Om vi bara fick äta en enda maträtt resten av livet, vad skulle vi välja?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Vilken är den värsta middagen vi någonsin har ätit tillsammans?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Om vi startade en restaurang, vad skulle den heta och vem skulle vara kocken?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Vilket snacks kan vi aldrig ha hemma för att det tar slut direkt?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Om vi fick uppfinna en ny sorts godis, hur skulle det smaka?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Vem är bäst på att duka fint?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Vilken är din favoritdryck till en riktig festmåltid?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Om vi fick bjuda en kändis på middag, vem skulle vi bjuda?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Vad är det konstigaste vi har i vårt kylskåp just nu?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Vem i familjen är mest kräsen med maten?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Om vi fick äta efterrätt före maten varje dag, skulle vi göra det?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Vilken frukt eller grönsak är mest lik din personlighet?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Vad är den bästa frukosten du kan tänka dig?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Vem av oss är bäst på att baka?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    { q: "Om vi skulle göra en egen kokbok, vad skulle vara vårt 'hemliga' recept?", cat: "mat", catName: "Mat & Köksbordssnack" },
+    
+    // Framtidsdrömmar
+    { q: "Var tror vi att vår familj befinner sig om fem år?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Om vi kunde bygga en tidsmaskin, skulle vi åka till dåtiden eller framtiden?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Vad är något som vi som familj vill lära oss tillsammans (t.ex. paddla kanot)?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Vilket husdjur skulle vi skaffa om vi hade obegränsat med plats och tid?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Vad hoppas du att vi gör tillsammans nästa sommar?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Om vi fick ändra en sak med vår stad, vad skulle det vara?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Vad ser du mest fram emot under det närmaste året?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Om vi skulle starta en familjeblogg eller YouTube-kanal, vad skulle den handla om?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Vilken sorts hus skulle vi bo i om vi fick drömma helt fritt?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Vad tror du kommer vara den största förändringen i vår familj om tio år?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Vilken superkraft skulle vår familj ha om vi var en superhjältegrupp?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Om vi fick chansen att åka till månen tillsammans, skulle vi göra det?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Vad är en dröm du har som du vill att vi hjälper dig att uppfylla?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Vilken sorts äventyr vill du att vi planerar härnäst?", cat: "framtid", catName: "Framtidsdrömmar" },
+    { q: "Vad hoppas du att vi aldrig slutar göra tillsammans?", cat: "framtid", catName: "Framtidsdrömmar" },
+    
+    // Stolthet & Värderingar
+    { q: "Vad gör dig mest stolt över att tillhöra just vår familj?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Vilken egenskap tycker du är den viktigaste hos en familjemedlem?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "När kände du senast att vi var ett riktigt bra team?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Vad är något snällt som någon i familjen gjorde nyligen som ingen annan såg?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Vad betyder ordet 'lojalitet' för oss?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Vilken är den viktigaste saken vi har lärt oss av varandra?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Hur visar vi bäst att vi bryr oss om varandra när någon har det tufft?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Vad är vår största styrka som familj?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Om vi skulle beskriva vår familj med tre ord, vilka skulle det vara?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Vad gör vår familj unik jämfört med andra familjer?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Vem i familjen är bäst på att sprida god stämning?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Hur gör vi för att alla ska känna sig hörda hemma?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Vilket råd skulle vi ge till en helt nybildad familj?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "Vad är det modigaste vi har gjort tillsammans?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    { q: "När känner du dig som mest älskad i den här familjen?", cat: "stolthet", catName: "Stolthet & Värderingar" },
+    
+    // Husdjur & Natur
+    { q: "Om våra husdjur kunde prata, vad skulle vara det första de sa till oss?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Vilket djur i naturen påminner mest om vår familj som grupp?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Vad är det roligaste våra husdjur (nuvarande eller tidigare) har gjort?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Om vi fick adoptera ett vilt djur, vilket skulle vi välja?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Vilken är vår favoritplats ute i naturen?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Vad är det mest spännande djuret vi har sett tillsammans i verkligheten?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Vem i familjen är mest rädd för insekter?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Om vi skulle bo i en skog i en vecka, vad skulle vi sakna mest hemifrån?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Vad är det bästa med att vara ute i friska luften tillsammans?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Vem av oss är bäst på att känna igen olika fåglar eller träd?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Skulle vi föredra att bo vid havet eller uppe bland bergen?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Vad är det mest magiska naturfenomenet vi har sett (t.ex. norrsken, storm)?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Vem är bäst på att tända en lägereld?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Om vi fick en magisk trädgård, vad skulle växa i den?", cat: "husdjur", catName: "Husdjur & Natur" },
+    { q: "Vad är det bästa minnet vi har från en promenad eller vandring?", cat: "husdjur", catName: "Husdjur & Natur" },
+    
+    // Skratt & Knasigheter
+    { q: "Om vi hade ett 'familje-läte' eller ett rop, hur skulle det låta?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Vilken är den sämsta vitsen någon i familjen brukar dra?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Om vi alla var tvungna att bära samma sorts hatt en hel dag, vilken skulle det vara?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Vem har den mest smittsamma skrattet i familjen?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Vad är det konstigaste vi har gjort för att spara tid?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Om vi skulle delta i en talangjakt tillsammans, vad skulle vårt nummer vara?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Vilken är den fånigaste saken vi har bråkat om (som vi skrattar åt nu)?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Vem av oss gör de bästa grimaser?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Om vi fick byta efternamn till något helt galet, vad skulle vi heta?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Vad är det mest pinsamma som har hänt någon av oss inför resten av familjen?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Om vi vaknade upp och alla hade bytt kroppar med varandra, vad skulle hända?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Vilken är den mest onödiga prylen vi äger tillsammans?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Vem är bäst på att berätta historier så att de låter mer spännande än de var?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Vad skulle hända om vi lät den yngsta i familjen bestämma allt för en dag?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    { q: "Vilket är vårt mest kända 'familje-citat' (något någon sa som vi alltid upprepar)?", cat: "skratt", catName: "Skratt & Knasigheter" },
+    
+    // Blandat & Oväntat
+    { q: "Om vi fick resa till en bok eller film, vilken skulle det vara?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Vilken är din favoritfärg på ett hus?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Om vi fick chansen att namnge en ny gata, vad skulle den heta?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Vad är det bästa med att ha just de grannar vi har?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Om vi fick vara med i ett TV-program, vilket skulle det vara?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Vad är det mest överraskande vi har lärt oss om varandra i år?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Vem i familjen är bäst på att hitta borttappade saker?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Om vi skulle bygga en hemlig gång i vårt hus, vart skulle den leda?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Vilken är den bästa gåvan vår familj har gett till någon annan?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Vad gör dig mest glad när du kliver innanför dörren efter en lång dag?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Om vi fick bestämma vädret för imorgon, hur skulle det se ut?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Vilken är den viktigaste saken i vårt hem (som inte är en person eller ett djur)?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Vad är det första du tänker på när du vaknar och vet att vi alla är lediga?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Om vi fick skriva en lag som bara gäller i vårt hus, vad skulle den vara?", cat: "blandat", catName: "Blandat & Oväntat" },
+    { q: "Vad är det absolut bästa med att just vi är en familj?", cat: "blandat", catName: "Blandat & Oväntat" }
+];
+        
+        // Shuffle questions
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+        
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let answeredCount = 0;
+        let skippedCount = 0;
+        let selectedCategory = 'all';
+        
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const startScreen = document.getElementById('startScreen');
+            const appContainer = document.getElementById('appContainer');
+            const cardStack = document.getElementById('cardStack');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const completeScreen = document.getElementById('completeScreen');
+            const skipBtn = document.getElementById('skipBtn');
+            const answerBtn = document.getElementById('answerBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            
+            function returnToMenu() {
+                appContainer.style.display = 'none';
+                startScreen.classList.remove('hide');
+                completeScreen.classList.remove('show');
+            }
+            
+            // Category selection
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    selectedCategory = card.dataset.category;
+                    startGame();
+                });
+            });
+            
+            function startGame() {
+                // Filter questions by category
+                let filteredQuestions = selectedCategory === 'all' 
+                    ? questions 
+                    : questions.filter(q => q.cat === selectedCategory);
+                
+                shuffledQuestions = shuffle(filteredQuestions);
+                currentIndex = 0;
+                answeredCount = 0;
+                skippedCount = 0;
+                
+                // Show app, hide start screen
+                startScreen.classList.add('hide');
+                appContainer.style.display = 'block';
+                
+                loadCards();
+                
+                // Setup back button
+                setTimeout(() => {
+                    const backBtn = document.getElementById('backButton');
+                    
+                    if (backBtn) {
+                        // Remove any existing listeners
+                        const newBackBtn = backBtn.cloneNode(true);
+                        backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+                        
+                        // Add click listener
+                        newBackBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            returnToMenu();
+                        }, true);
+                        
+                        // Also try touch events for mobile
+                        newBackBtn.addEventListener('touchend', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            returnToMenu();
+                        }, true);
+                    }
+                }, 200);
+            }
+            
+            function createCard(question, index) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.transform = `translateY(${Math.min(index * 4, 12)}px) scale(${1 - Math.min(index * 0.02, 0.06)})`;
+                card.style.zIndex = 100 - index;
+                card.style.opacity = index < 3 ? 1 : 0;
+                
+                card.innerHTML = `
+                    <span class="card-category cat-${question.cat}">${question.catName}</span>
+                    <div class="card-question">${question.q}</div>
+                    <div class="swipe-indicator left">Hoppa över</div>
+                    <div class="swipe-indicator right">Besvara</div>
+                `;
+                
+                let startX = 0;
+                let currentX = 0;
+                let isDragging = false;
+                
+                function handleStart(e) {
+                    isDragging = true;
+                    card.classList.add('dragging');
+                    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    currentX = startX;
+                }
+                
+                function handleMove(e) {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    const diff = currentX - startX;
+                    const rotation = diff / 20;
+                    card.style.transform = `translateX(${diff}px) rotate(${rotation}deg)`;
+                    
+                    const leftIndicator = card.querySelector('.swipe-indicator.left');
+                    const rightIndicator = card.querySelector('.swipe-indicator.right');
+                    
+                    if (diff < -50) {
+                        leftIndicator.style.opacity = Math.min(Math.abs(diff) / 150, 1);
+                        rightIndicator.style.opacity = 0;
+                    } else if (diff > 50) {
+                        rightIndicator.style.opacity = Math.min(diff / 150, 1);
+                        leftIndicator.style.opacity = 0;
+                    } else {
+                        leftIndicator.style.opacity = 0;
+                        rightIndicator.style.opacity = 0;
+                    }
+                }
+                
+                function handleEnd() {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    card.classList.remove('dragging');
+                    
+                    const diff = currentX - startX;
+                    const leftIndicator = card.querySelector('.swipe-indicator.left');
+                    const rightIndicator = card.querySelector('.swipe-indicator.right');
+                    leftIndicator.style.opacity = 0;
+                    rightIndicator.style.opacity = 0;
+                    
+                    if (Math.abs(diff) > 100) {
+                        if (diff < 0) {
+                            skipCard();
+                        } else {
+                            answerCard();
+                        }
+                    } else {
+                        card.style.transform = '';
+                    }
+                }
+                
+                card.addEventListener('mousedown', handleStart);
+                card.addEventListener('mousemove', handleMove);
+                card.addEventListener('mouseup', handleEnd);
+                card.addEventListener('mouseleave', handleEnd);
+                
+                card.addEventListener('touchstart', handleStart, { passive: true });
+                card.addEventListener('touchmove', handleMove, { passive: false });
+                card.addEventListener('touchend', handleEnd);
+                
+                return card;
+            }
+            
+            function loadCards() {
+                cardStack.innerHTML = '';
+                for (let i = 0; i < Math.min(3, shuffledQuestions.length - currentIndex); i++) {
+                    const card = createCard(shuffledQuestions[currentIndex + i], i);
+                    cardStack.appendChild(card);
+                }
+                updateProgress();
+            }
+            
+            function updateProgress() {
+                const progress = (currentIndex / shuffledQuestions.length) * 100;
+                progressFill.style.width = `${progress}%`;
+                progressText.textContent = `${currentIndex} av ${shuffledQuestions.length}`;
+            }
+            
+            function removeCurrentCard(direction) {
+                const cards = cardStack.querySelectorAll('.card');
+                if (cards.length === 0) return;
+                
+                const topCard = cards[0];
+                topCard.classList.add(direction === 'left' ? 'exiting-left' : 'exiting-right');
+                
+                setTimeout(() => {
+                    topCard.remove();
+                    currentIndex++;
+                    
+                    if (currentIndex < shuffledQuestions.length) {
+                        const nextIndex = cardStack.querySelectorAll('.card').length;
+                        if (currentIndex + nextIndex < shuffledQuestions.length) {
+                            const newCard = createCard(shuffledQuestions[currentIndex + nextIndex], nextIndex);
+                            cardStack.appendChild(newCard);
+                            
+                            setTimeout(() => {
+                                newCard.style.opacity = 1;
+                            }, 50);
+                        }
+                        
+                        // Update remaining cards
+                        const remainingCards = cardStack.querySelectorAll('.card');
+                        remainingCards.forEach((card, index) => {
+                            card.style.transform = `translateY(${Math.min(index * 4, 12)}px) scale(${1 - Math.min(index * 0.02, 0.06)})`;
+                            card.style.zIndex = 100 - index;
+                        });
+                        
+                        updateProgress();
+                    } else {
+                        showComplete();
+                    }
+                }, 300);
+            }
+            
+            function skipCard() {
+                skippedCount++;
+                removeCurrentCard('left');
+            }
+            
+            function answerCard() {
+                answeredCount++;
+                removeCurrentCard('right');
+            }
+            
+            function showComplete() {
+                document.getElementById('answeredCount').textContent = answeredCount;
+                document.getElementById('skippedCount').textContent = skippedCount;
+                completeScreen.classList.add('show');
+            }
+            
+            function restart() {
+                returnToMenu();
+            }
+            
+            skipBtn.addEventListener('click', skipCard);
+            answerBtn.addEventListener('click', answerCard);
+            restartBtn.addEventListener('click', restart);
+            
+            // Keyboard support
+            document.addEventListener('keydown', (e) => {
+                if (completeScreen.classList.contains('show')) return;
+                if (appContainer.style.display === 'none') return;
+                if (e.key === 'ArrowLeft') skipCard();
+                if (e.key === 'ArrowRight') answerCard();
+            });
+        });
+    </script>
+</body>
+</html>

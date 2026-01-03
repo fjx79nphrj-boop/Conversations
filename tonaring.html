@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reflektionskort</title>
+    <style>
+        :root {
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-orange: #FF9500;
+            --ios-pink: #FF2D55;
+            --ios-purple: #AF52DE;
+            --ios-teal: #5AC8FA;
+            --ios-yellow: #FFCC00;
+            --ios-red: #FF3B30;
+            
+            --bg-primary: #F2F2F7;
+            --bg-secondary: #FFFFFF;
+            --text-primary: #000000;
+            --text-secondary: #8E8E93;
+            --separator: rgba(60, 60, 67, 0.29);
+            
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #000000;
+                --bg-secondary: #1C1C1E;
+                --text-primary: #FFFFFF;
+                --text-secondary: #8E8E93;
+                --separator: rgba(84, 84, 88, 0.65);
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .app-container {
+            max-width: 428px;
+            margin: 0 auto;
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 100px;
+        }
+        
+        /* Header */
+        .header {
+            padding: 60px 20px 20px;
+            text-align: center;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, transparent 100%);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            position: relative;
+        }
+        
+        .back-button {
+            position: absolute;
+            left: 20px;
+            top: 60px;
+            width: 32px;
+            height: 32px;
+            border-radius: 16px;
+            background: var(--bg-secondary);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            color: var(--ios-blue);
+            z-index: 999;
+            pointer-events: auto;
+        }
+        
+        .back-button:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .back-button:active {
+            transform: scale(0.95);
+        }
+        
+        .back-button svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .header h1 {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+        
+        /* Start Screen */
+        .start-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            z-index: 400;
+            display: flex;
+            flex-direction: column;
+            padding: 40px 20px;
+            overflow-y: auto;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .start-screen.hide {
+            display: none;
+        }
+        
+        .start-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .start-header h1 {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 12px;
+        }
+        
+        .start-header p {
+            font-size: 17px;
+            color: var(--text-secondary);
+        }
+        
+        .category-grid {
+            display: grid;
+            gap: 12px;
+            max-width: 428px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .category-card {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .category-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .category-card:active {
+            transform: scale(0.98);
+        }
+        
+        .category-icon {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+        
+        .category-info {
+            flex: 1;
+        }
+        
+        .category-name {
+            font-size: 17px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .category-count {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .category-card.blandat {
+            background: linear-gradient(135deg, var(--ios-blue) 0%, var(--ios-purple) 100%);
+            color: white;
+            padding: 24px 20px;
+        }
+        
+        .category-card.blandat .category-name {
+            color: white;
+        }
+        
+        .category-card.blandat .category-count {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .category-card.blandat .category-icon {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Progress */
+        .progress-container {
+            padding: 0 20px 20px;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: var(--separator);
+            border-radius: 2px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--ios-blue);
+            border-radius: 2px;
+            transition: width 0.4s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+        
+        .progress-text {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+        
+        /* Card Stack */
+        .card-stack {
+            position: relative;
+            padding: 0 20px;
+            min-height: 400px;
+        }
+        
+        .card {
+            position: absolute;
+            left: 20px;
+            right: 20px;
+            background: var(--bg-secondary);
+            border-radius: 20px;
+            padding: 40px 28px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+        }
+        
+        .card:active {
+            cursor: grabbing;
+        }
+        
+        .card.dragging {
+            transition: none;
+        }
+        
+        .card.exiting-left {
+            transform: translateX(-500px) rotate(-30deg);
+            opacity: 0;
+        }
+        
+        .card.exiting-right {
+            transform: translateX(500px) rotate(30deg);
+            opacity: 0;
+        }
+        
+        .card-category {
+            display: inline-block;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .card-question {
+            font-size: 28px;
+            font-weight: 600;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+            text-align: center;
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Category Colors */
+        .cat-oro { background: rgba(255, 45, 85, 0.15); color: var(--ios-pink); }
+        .cat-känslor { background: rgba(255, 149, 0, 0.15); color: var(--ios-orange); }
+        .cat-humor { background: rgba(255, 204, 0, 0.15); color: var(--ios-yellow); }
+        .cat-vänskap { background: rgba(52, 199, 89, 0.15); color: var(--ios-green); }
+        .cat-skola { background: rgba(0, 122, 255, 0.15); color: var(--ios-blue); }
+        .cat-värderingar { background: rgba(175, 82, 222, 0.15); color: var(--ios-purple); }
+        .cat-framtid { background: rgba(90, 200, 250, 0.15); color: var(--ios-teal); }
+        .cat-familj { background: rgba(255, 45, 85, 0.15); color: var(--ios-pink); }
+        .cat-själv { background: rgba(175, 82, 222, 0.15); color: var(--ios-purple); }
+        .cat-öppet { background: rgba(52, 199, 89, 0.15); color: var(--ios-green); }
+        .cat-öppna-upp { background: rgba(255, 59, 48, 0.15); color: var(--ios-red); }
+        
+        /* Action Buttons */
+        .actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            background: linear-gradient(0deg, var(--bg-primary) 80%, transparent 100%);
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            z-index: 200;
+            max-width: 428px;
+            margin: 0 auto;
+        }
+        
+        .action-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 32px;
+            border: none;
+            background: var(--bg-secondary);
+            box-shadow: var(--shadow-md);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s cubic-bezier(0.4, 0.0, 0.2, 1);
+            position: relative;
+        }
+        
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .action-btn.skip {
+            background: var(--ios-red);
+        }
+        
+        .action-btn.answer {
+            background: var(--ios-green);
+            width: 72px;
+            height: 72px;
+            border-radius: 36px;
+        }
+        
+        .action-btn svg {
+            width: 28px;
+            height: 28px;
+            color: white;
+        }
+        
+        /* Swipe Indicators */
+        .swipe-indicator {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 17px;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+        }
+        
+        .swipe-indicator.left {
+            left: 20px;
+            background: rgba(255, 59, 48, 0.9);
+            color: white;
+        }
+        
+        .swipe-indicator.right {
+            right: 20px;
+            background: rgba(52, 199, 89, 0.9);
+            color: white;
+        }
+        
+        .card.dragging .swipe-indicator {
+            opacity: 1;
+        }
+        
+        /* Complete Screen */
+        .complete-screen {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--bg-primary);
+            z-index: 300;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            text-align: center;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .complete-screen.show {
+            display: flex;
+        }
+        
+        .complete-icon {
+            width: 100px;
+            height: 100px;
+            background: var(--ios-green);
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .complete-icon svg {
+            width: 56px;
+            height: 56px;
+            color: white;
+        }
+        
+        .complete-screen h2 {
+            font-size: 34px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            letter-spacing: -0.5px;
+        }
+        
+        .complete-screen p {
+            font-size: 17px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            max-width: 300px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .stat {
+            background: var(--bg-secondary);
+            padding: 20px 28px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .restart-btn {
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            transition: all 0.2s;
+        }
+        
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .restart-btn:active {
+            transform: translateY(0);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="start-screen" id="startScreen">
+        <div class="start-header">
+            <h1>Reflektionskort</h1>
+            <p>Välj en kategori att utforska</p>
+        </div>
+        
+        <div class="category-grid">
+            <div class="category-card blandat" data-category="all">
+                <div class="category-icon">🎲</div>
+                <div class="category-info">
+                    <div class="category-name">Blandat</div>
+                    <div class="category-count">Alla 165 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="oro">
+                <div class="category-icon cat-oro">🌟</div>
+                <div class="category-info">
+                    <div class="category-name">Oro & Självkänsla</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="känslor">
+                <div class="category-icon cat-känslor">❤️</div>
+                <div class="category-info">
+                    <div class="category-name">Känslor</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="humor">
+                <div class="category-icon cat-humor">😄</div>
+                <div class="category-info">
+                    <div class="category-name">Humor & Pinsamt</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="vänskap">
+                <div class="category-icon cat-vänskap">👥</div>
+                <div class="category-info">
+                    <div class="category-name">Vänskap & Relationer</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="skola">
+                <div class="category-icon cat-skola">📚</div>
+                <div class="category-info">
+                    <div class="category-name">Skola & Prestationer</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="värderingar">
+                <div class="category-icon cat-värderingar">💎</div>
+                <div class="category-info">
+                    <div class="category-name">Värderingar & Moral</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="framtid">
+                <div class="category-icon cat-framtid">🚀</div>
+                <div class="category-info">
+                    <div class="category-name">Framtid & Drömmar</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="familj">
+                <div class="category-icon cat-familj">🏡</div>
+                <div class="category-info">
+                    <div class="category-name">Familj & Hem</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="själv">
+                <div class="category-icon cat-själv">🌱</div>
+                <div class="category-info">
+                    <div class="category-name">Själv & Tillväxt</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="öppet">
+                <div class="category-icon cat-öppet">💭</div>
+                <div class="category-info">
+                    <div class="category-name">Öppna Frågor</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+            
+            <div class="category-card" data-category="öppna-upp">
+                <div class="category-icon cat-öppna-upp">💬</div>
+                <div class="category-info">
+                    <div class="category-name">Öppna upp</div>
+                    <div class="category-count">15 frågor</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="app-container" id="appContainer" style="display: none;">
+        <div class="header">
+            <button class="back-button" id="backButton" aria-label="Tillbaka till meny" type="button">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+            <h1>Reflektionskort</h1>
+            <p>Svep för att svara eller hoppa över</p>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">0 av 150</div>
+        </div>
+        
+        <div class="card-stack" id="cardStack">
+            <!-- Cards will be generated here -->
+        </div>
+        
+        <div class="actions">
+            <button class="action-btn skip" id="skipBtn" aria-label="Hoppa över">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+            <button class="action-btn answer" id="answerBtn" aria-label="Besvara">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+    
+    <div class="complete-screen" id="completeScreen">
+        <div class="complete-icon">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/>
+            </svg>
+        </div>
+        <h2>Fantastiskt jobbat!</h2>
+        <p>Du har gått igenom alla reflektionskort</p>
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="answeredCount">0</div>
+                <div class="stat-label">Besvarade</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="skippedCount">0</div>
+                <div class="stat-label">Överhoppade</div>
+            </div>
+        </div>
+        <button class="restart-btn" id="restartBtn">Välj ny kategori</button>
+    </div>
+    
+    <script>
+        const questions = [
+            // Oro & Självkänsla
+            { q: "Vad oroar du dig mest för just nu?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Vad är något du tror att vuxna inte förstår med att vara i din ålder?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "När känner du dig som mest självsäker?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "När känner du dig som mest osäker?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Vad är något du är stolt över men sällan säger högt?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Vad önskar du att du var bättre på?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Vad får dig att känna dig lugn?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Vad stressar dig oftast?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Vad gör du när du känner dig överväldigad?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Vad är något du nyligen har ändrat åsikt om?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Vad betyder 'att lyckas' för dig just nu?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Hur tror du att du kommer vara när du är 25?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Vad önskar du att andra lade märke till hos dig?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "När känner du dig mest som dig själv?", cat: "oro", catName: "Oro & Självkänsla" },
+            { q: "Vad är något du låtsas inte stör dig – men som faktiskt gör det?", cat: "oro", catName: "Oro & Självkänsla" },
+            
+            // Känslor
+            { q: "Vad brukar sätta dig på gott humör?", cat: "känslor", catName: "Känslor" },
+            { q: "Vad är det snabbaste sättet att förstöra ditt humör?", cat: "känslor", catName: "Känslor" },
+            { q: "Vad gör du när du är arg?", cat: "känslor", catName: "Känslor" },
+            { q: "Vad får dig att må bättre när du är sjuk eller ledsen?", cat: "känslor", catName: "Känslor" },
+            { q: "Vilken känsla känner du oftast?", cat: "känslor", catName: "Känslor" },
+            { q: "Vilken känsla försöker du undvika mest?", cat: "känslor", catName: "Känslor" },
+            { q: "När skrattade du riktigt hårt senast?", cat: "känslor", catName: "Känslor" },
+            { q: "När kände du dig senast besviken?", cat: "känslor", catName: "Känslor" },
+            { q: "Vad hjälper dig att känna dig förstådd?", cat: "känslor", catName: "Känslor" },
+            { q: "Vad får dig att stänga av?", cat: "känslor", catName: "Känslor" },
+            { q: "Vem känner du dig tryggast att prata med?", cat: "känslor", catName: "Känslor" },
+            { q: "Vad önskar du att du kunde säga utan att bli dömd?", cat: "känslor", catName: "Känslor" },
+            { q: "Vad får dig att känna dig ensam?", cat: "känslor", catName: "Känslor" },
+            { q: "Vad får dig att känna dig uppskattad?", cat: "känslor", catName: "Känslor" },
+            { q: "Vad skrämmer dig med framtiden, om något?", cat: "känslor", catName: "Känslor" },
+            
+            // Humor & Pinsamt
+            { q: "Vad är det dummaste du någonsin skrattat åt?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vad är ditt mest pinsamma ögonblick i skolan?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vilken konstig vana har du?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vilken är din mest värdelösa talang?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Om ditt liv var en film, vilken genre skulle det vara?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vilken låt gillar du i hemlighet?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vilken är den värsta frisyren du haft?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vad irriterar dig direkt?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vilken mat skulle du kunna äta varje dag?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vilken mat hatar du?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vad är det roligaste som hänt i år?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vilken är den sämsta filmen du sett?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vad tar vuxna på alldeles för stort allvar?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Vad överreagerar folk i din ålder på?", cat: "humor", catName: "Humor & Pinsamt" },
+            { q: "Om du hade en varningsetikett, vad skulle det stå?", cat: "humor", catName: "Humor & Pinsamt" },
+            
+            // Vänskap & Relationer
+            { q: "Vad gör någon till en bra vän?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vad gör någon jobbig att vara med?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vem får dig att skratta mest?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vad värdesätter du mest hos dina vänner?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vad stör du dig på hos folk i din ålder?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vad gillar du med folk i din ålder?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Har du någon gång vuxit ifrån en vänskap?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vad gör du när vänner sviker dig?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vilken sorts vän är du?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vad får dig att känna dig inkluderad?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vad får dig att känna dig utanför?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vad önskar du att dina vänner visste om dig?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Föredrar du en liten grupp eller många människor?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vilket är ditt bästa minne med vänner?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            { q: "Vad är det svåraste med vänskap?", cat: "vänskap", catName: "Vänskap & Relationer" },
+            
+            // Skola & Prestationer
+            { q: "Vilket ämne gillar du i smyg?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vilket ämne avskyr du?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad känns meningslöst i skolan?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad känns viktigt i skolan?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad stressar dig med skolan?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad motiverar dig att försöka?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad får dig att vilja ge upp?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad önskar du att skolan lärde ut bättre?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad önskar du att lärare förstod?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad är din största skolrelaterade oro?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad gör skolan svårare än det borde vara?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad hjälper skolan dig faktiskt med?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Hur hanterar du press?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Hur är din relation till betyg?", cat: "skola", catName: "Skola & Prestationer" },
+            { q: "Vad skulle göra skolan mer uthärdlig?", cat: "skola", catName: "Skola & Prestationer" },
+            
+            // Värderingar & Moral
+            { q: "Vad betyder det för dig att vara en 'bra människa'?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vilken typ av person respekterar du?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vilket beteende tappar du respekten för?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vilka regler tycker du är rimliga?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vilka regler känns orimliga?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vad tycker du är viktigast i livet?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vad tycker du betyder mycket mindre än folk säger?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vad tycker du gör någon stark?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vad tycker du gör någon svag?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Hur ser mod ut enligt dig?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Hur ser snällhet ut enligt dig?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vad betyder lojalitet för dig?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vilka värderingar har du redan?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vilka värderingar håller du fortfarande på att lista ut?", cat: "värderingar", catName: "Värderingar & Moral" },
+            { q: "Vad står du upp för?", cat: "värderingar", catName: "Värderingar & Moral" },
+            
+            // Framtid & Drömmar
+            { q: "Vad dagdrömmer du om?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vad med framtiden gör dig taggad?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vad oroar dig med att bli vuxen?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vilket jobb låter coolt, även om det är orealistiskt?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vilken sorts liv vill du inte ha?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vilken sorts liv vill du ha?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vad hoppas du aldrig förändras?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vad hoppas du förändras?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vad vill du ha mer kontroll över?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vad vill du känna mindre press kring?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Var vill du bo i framtiden?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Hur skulle ett 'bra liv' se ut för dig?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vad är något du vill uppleva?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vad är något du inte vill missa i livet?", cat: "framtid", catName: "Framtid & Drömmar" },
+            { q: "Vad tror du att du kommer växa in i?", cat: "framtid", catName: "Framtid & Drömmar" },
+            
+            // Familj & Hem
+            { q: "Vad är det bästa med din familj?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vad är det svåraste?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vad får hemmet att kännas tryggt?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vad gör hemmet stressigt?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vad uppskattar du hos dina föräldrar?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vad önskar du att de förstod bättre?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vilken familjeregel stör dig mest?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vilken familjetradition gillar du?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Hur önskar du att familjesamtal var?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vem känner du dig närmast hemma?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vad får dig att känna dig stöttad?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vad får dig att känna dig kontrollerad?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vad önskar du att du kunde säga hemma?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vad får dig att känna dig betrodd?", cat: "familj", catName: "Familj & Hem" },
+            { q: "Vad får dig att känna dig missförstådd?", cat: "familj", catName: "Familj & Hem" },
+            
+            // Själv & Tillväxt
+            { q: "Vad är något du fortfarande håller på att lista ut om dig själv?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vad är något du vet säkert om dig själv?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vilken etikett ger folk dig som känns fel?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vilken etikett passar dig bäst?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vad vill du bli känd för?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vad bryr du dig inte om att bli känd för?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vad har du lärt dig den hårda vägen?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vilket misstag lärde dig mest?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vad jobbar du på att bli bättre på?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vad har du redan blivit bättre på?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vad hjälper dig att utvecklas?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vad håller dig tillbaka?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vilket råd skulle du ge ditt yngre jag?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vilket råd ignorerar du trots att det är bra?", cat: "själv", catName: "Själv & Tillväxt" },
+            { q: "Vad får dig att känna dig kapabel?", cat: "själv", catName: "Själv & Tillväxt" },
+            
+            // Öppna Frågor
+            { q: "Beskriv din perfekta dag.", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad gör du när ingen ser?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad får tiden att flyga för dig?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad får tiden att gå långsamt?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad känner du starkast för?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad känner du dig förvirrad kring?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad önskar du att folk frågade dig oftare?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vilken fråga hatar du att få?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad önskar du att du kunde fråga vuxna?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad vill du att folk ska sluta anta om dig?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad vill du att folk ska börja anta om dig?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad får dig att känna hopp?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad får dig att känna dig fast?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad tror du att du är bättre på än du inser?", cat: "öppet", catName: "Öppna Frågor" },
+            { q: "Vad är något viktigt med dig som de flesta inte ser?", cat: "öppet", catName: "Öppna Frågor" },
+            
+            // Öppna upp
+            { q: "När känner du att jag faktiskt lyssnar på dig, och när känner du att jag bara väntar på min tur att prata?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Vad är en sak du önskar att jag slutade oroa mig för när det gäller dig?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Vilken del av din personlighet tycker du att du har fått från mig, och är du nöjd med det eller inte?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Vad är det modigaste du har sett någon göra i din ålder (som inte handlar om att vara fysiskt stark)?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Om du kunde ge mig ett 'betyg' som förälder det här året – var har jag störst utvecklingspotential?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Finns det något du går och bär på som du tror skulle göra mig besviken, men som du egentligen bara vill få ur dig?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Vad ser du mest fram emot med att flytta hemifrån, och vad skrämmer dig mest med det?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "När känner du att du måste bära en 'mask' för att passa in, och när kan du faktiskt vara dig själv till 100 %?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Finns det något jag har gjort det senaste året som har fått dig att känna dig liten eller missförstådd, även om det inte var meningen?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Vad är det viktigaste en förälder kan göra för att hemmet ska kännas som en 'frizon' och inte en plats där man känner sig granskad?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "När känner du dig som mest ensam, även om vi sitter i samma rum eller om du är omgiven av kompisar?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Vad är något du önskar att jag visste om din värld (kompisar, press, intressen) – utan att jag för den skull börjar lägga mig i?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Om vi bytte roller för en dag, vad är det första du skulle ändra på i hur jag pratar med eller bemöter dig?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Vad är det största missförståndet vuxna har om hur det faktiskt är att växa upp och vara 15 år just nu?", cat: "öppna-upp", catName: "Öppna upp" },
+            { q: "Finns det någon fråga du önskar att jag ställde oftare, eller någon fråga du verkligen önskar att jag aldrig ställde igen?", cat: "öppna-upp", catName: "Öppna upp" }
+        ];
+        
+        // Shuffle questions
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+        
+        let shuffledQuestions = [];
+        let currentIndex = 0;
+        let answeredCount = 0;
+        let skippedCount = 0;
+        let selectedCategory = 'all';
+        
+        // Wait for DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            const startScreen = document.getElementById('startScreen');
+            const appContainer = document.getElementById('appContainer');
+            const cardStack = document.getElementById('cardStack');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const completeScreen = document.getElementById('completeScreen');
+            const skipBtn = document.getElementById('skipBtn');
+            const answerBtn = document.getElementById('answerBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            
+            function returnToMenu() {
+                appContainer.style.display = 'none';
+                startScreen.classList.remove('hide');
+                completeScreen.classList.remove('show');
+            }
+            
+            // Category selection
+            document.querySelectorAll('.category-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    selectedCategory = card.dataset.category;
+                    startGame();
+                });
+            });
+            
+            function startGame() {
+                // Filter questions by category
+                let filteredQuestions = selectedCategory === 'all' 
+                    ? questions 
+                    : questions.filter(q => q.cat === selectedCategory);
+                
+                shuffledQuestions = shuffle(filteredQuestions);
+                currentIndex = 0;
+                answeredCount = 0;
+                skippedCount = 0;
+                
+                // Show app, hide start screen
+                startScreen.classList.add('hide');
+                appContainer.style.display = 'block';
+                
+                loadCards();
+                
+                // Setup back button
+                setTimeout(() => {
+                    const backBtn = document.getElementById('backButton');
+                    
+                    if (backBtn) {
+                        // Remove any existing listeners
+                        const newBackBtn = backBtn.cloneNode(true);
+                        backBtn.parentNode.replaceChild(newBackBtn, backBtn);
+                        
+                        // Add click listener
+                        newBackBtn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            returnToMenu();
+                        }, true);
+                        
+                        // Also try touch events for mobile
+                        newBackBtn.addEventListener('touchend', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            returnToMenu();
+                        }, true);
+                    }
+                }, 200);
+            }
+            
+            function createCard(question, index) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.style.transform = `translateY(${Math.min(index * 4, 12)}px) scale(${1 - Math.min(index * 0.02, 0.06)})`;
+                card.style.zIndex = 100 - index;
+                card.style.opacity = index < 3 ? 1 : 0;
+                
+                card.innerHTML = `
+                    <span class="card-category cat-${question.cat}">${question.catName}</span>
+                    <div class="card-question">${question.q}</div>
+                    <div class="swipe-indicator left">Hoppa över</div>
+                    <div class="swipe-indicator right">Besvara</div>
+                `;
+                
+                let startX = 0;
+                let currentX = 0;
+                let isDragging = false;
+                
+                function handleStart(e) {
+                    isDragging = true;
+                    card.classList.add('dragging');
+                    startX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    currentX = startX;
+                }
+                
+                function handleMove(e) {
+                    if (!isDragging) return;
+                    e.preventDefault();
+                    currentX = e.type.includes('mouse') ? e.clientX : e.touches[0].clientX;
+                    const diff = currentX - startX;
+                    const rotation = diff / 20;
+                    card.style.transform = `translateX(${diff}px) rotate(${rotation}deg)`;
+                    
+                    const leftIndicator = card.querySelector('.swipe-indicator.left');
+                    const rightIndicator = card.querySelector('.swipe-indicator.right');
+                    
+                    if (diff < -50) {
+                        leftIndicator.style.opacity = Math.min(Math.abs(diff) / 150, 1);
+                        rightIndicator.style.opacity = 0;
+                    } else if (diff > 50) {
+                        rightIndicator.style.opacity = Math.min(diff / 150, 1);
+                        leftIndicator.style.opacity = 0;
+                    } else {
+                        leftIndicator.style.opacity = 0;
+                        rightIndicator.style.opacity = 0;
+                    }
+                }
+                
+                function handleEnd() {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    card.classList.remove('dragging');
+                    
+                    const diff = currentX - startX;
+                    const leftIndicator = card.querySelector('.swipe-indicator.left');
+                    const rightIndicator = card.querySelector('.swipe-indicator.right');
+                    leftIndicator.style.opacity = 0;
+                    rightIndicator.style.opacity = 0;
+                    
+                    if (Math.abs(diff) > 100) {
+                        if (diff < 0) {
+                            skipCard();
+                        } else {
+                            answerCard();
+                        }
+                    } else {
+                        card.style.transform = '';
+                    }
+                }
+                
+                card.addEventListener('mousedown', handleStart);
+                card.addEventListener('mousemove', handleMove);
+                card.addEventListener('mouseup', handleEnd);
+                card.addEventListener('mouseleave', handleEnd);
+                
+                card.addEventListener('touchstart', handleStart, { passive: true });
+                card.addEventListener('touchmove', handleMove, { passive: false });
+                card.addEventListener('touchend', handleEnd);
+                
+                return card;
+            }
+            
+            function loadCards() {
+                cardStack.innerHTML = '';
+                for (let i = 0; i < Math.min(3, shuffledQuestions.length - currentIndex); i++) {
+                    const card = createCard(shuffledQuestions[currentIndex + i], i);
+                    cardStack.appendChild(card);
+                }
+                updateProgress();
+            }
+            
+            function updateProgress() {
+                const progress = (currentIndex / shuffledQuestions.length) * 100;
+                progressFill.style.width = `${progress}%`;
+                progressText.textContent = `${currentIndex} av ${shuffledQuestions.length}`;
+            }
+            
+            function removeCurrentCard(direction) {
+                const cards = cardStack.querySelectorAll('.card');
+                if (cards.length === 0) return;
+                
+                const topCard = cards[0];
+                topCard.classList.add(direction === 'left' ? 'exiting-left' : 'exiting-right');
+                
+                setTimeout(() => {
+                    topCard.remove();
+                    currentIndex++;
+                    
+                    if (currentIndex < shuffledQuestions.length) {
+                        const nextIndex = cardStack.querySelectorAll('.card').length;
+                        if (currentIndex + nextIndex < shuffledQuestions.length) {
+                            const newCard = createCard(shuffledQuestions[currentIndex + nextIndex], nextIndex);
+                            cardStack.appendChild(newCard);
+                            
+                            setTimeout(() => {
+                                newCard.style.opacity = 1;
+                            }, 50);
+                        }
+                        
+                        // Update remaining cards
+                        const remainingCards = cardStack.querySelectorAll('.card');
+                        remainingCards.forEach((card, index) => {
+                            card.style.transform = `translateY(${Math.min(index * 4, 12)}px) scale(${1 - Math.min(index * 0.02, 0.06)})`;
+                            card.style.zIndex = 100 - index;
+                        });
+                        
+                        updateProgress();
+                    } else {
+                        showComplete();
+                    }
+                }, 300);
+            }
+            
+            function skipCard() {
+                skippedCount++;
+                removeCurrentCard('left');
+            }
+            
+            function answerCard() {
+                answeredCount++;
+                removeCurrentCard('right');
+            }
+            
+            function showComplete() {
+                document.getElementById('answeredCount').textContent = answeredCount;
+                document.getElementById('skippedCount').textContent = skippedCount;
+                completeScreen.classList.add('show');
+            }
+            
+            function restart() {
+                returnToMenu();
+            }
+            
+            skipBtn.addEventListener('click', skipCard);
+            answerBtn.addEventListener('click', answerCard);
+            restartBtn.addEventListener('click', restart);
+            
+            // Keyboard support
+            document.addEventListener('keydown', (e) => {
+                if (completeScreen.classList.contains('show')) return;
+                if (appContainer.style.display === 'none') return;
+                if (e.key === 'ArrowLeft') skipCard();
+                if (e.key === 'ArrowRight') answerCard();
+            });
+        });
+    </script>
+</body>
+</html>
